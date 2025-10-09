@@ -1,17 +1,22 @@
-flask==2.2.5
-Werkzeug==2.3.7
-jinja2==3.1.2
-flask-login==0.6.2
-flask_migrate==4.0.4
-WTForms==3.0.1
-flask_wtf==1.2.1
-flask-sqlalchemy==3.0.5
-sqlalchemy==2.0.21
-email_validator==2.0.0
-flask-restx==1.1.0
-flask_bootstrap==3.3.7
-python-dotenv==0.19.2
-gunicorn==20.1.0
+fastapi==0.115.2
+uvicorn==0.30.6
 
-# flask_mysqldb
-# psycopg2-binary
+# Database and ORM
+SQLAlchemy==2.0.36
+pymysql==1.1.1
+
+# Password hashing
+passlib[bcrypt]==1.7.4
+
+# JWT token handling
+python-jose[cryptography]==3.3.0
+
+# Environment variables
+python-dotenv==1.0.1
+
+# Data validation
+pydantic==2.9.2
+pydantic_core==2.23.4
+
+# Optional: if you use Alembic for migrations
+alembic==1.13.3

@@ -1,66 +1,72 @@
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, Time, DateTime
+from sqlalchemy.orm import relationship, declarative_base
 from datetime import datetime
 
-
-db = SQLAlchemy()
+Base = declarative_base()
 
 # User model (for patients and doctors login)
-class User(db.Model):
+class User(Base):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
-    role = db.Column(db.String(20), nullable=False)  # "patient" or "doctor"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    email = Column(String(100), unique=True, nullable=False)
+    password = Column(String(200), nullable=False)
+    role = Column(String(20), nullable=False)  # "patient" or "doctor"
 
     # Relationships
-    patient_profile = db.relationship('Patient', backref='user', uselist=False)
-    doctor_profile = db.relationship('Doctor', backref='user', uselist=False)
+    patient_profile = relationship('Patient', backref='user', uselist=False)
+    doctor_profile = relationship('Doctor', backref='user', uselist=False)
 
 
 # Patient profile (extra info for patients)
-class Patient(db.Model):
+class Patient(Base):
     __tablename__ = 'patients'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    age = db.Column(db.Integer, nullable=True)
-    gender = db.Column(db.String(10), nullable=True)
-    contact = db.Column(db.String(20), nullable=True)
 
-    appointments = db.relationship('Appointment', backref='patient', lazy=True)
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    age = Column(Integer, nullable=True)
+    gender = Column(String(10), nullable=True)
+    contact = Column(String(20), nullable=True)
+
+    appointments = relationship('Appointment', backref='patient', lazy=True)
 
 
 # Doctor profile (extra info for doctors)
-class Doctor(db.Model):
+class Doctor(Base):
     __tablename__ = 'doctors'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    specialization = db.Column(db.String(100), nullable=False)
-    contact = db.Column(db.String(20), nullable=True)
 
-    schedules = db.relationship('Schedule', backref='doctor', lazy=True)
-    appointments = db.relationship('Appointment', backref='doctor', lazy=True)
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    specialization = Column(String(100), nullable=False)
+    contact = Column(String(20), nullable=True)
+
+    schedules = relationship('Schedule', backref='doctor', lazy=True)
+    appointments = relationship('Appointment', backref='doctor', lazy=True)
 
 
 # Doctor schedules (available times doctors provide)
-class Schedule(db.Model):
+class Schedule(Base):
     __tablename__ = 'schedules'
-    id = db.Column(db.Integer, primary_key=True)
-    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
-    date = db.Column(db.Date, nullable=False)
-    start_time = db.Column(db.Time, nullable=False)
-    end_time = db.Column(db.Time, nullable=False)
-    status = db.Column(db.String(20), default='Available')  
-    appointments = db.relationship('Appointment', backref='schedule', lazy=True)
+
+    id = Column(Integer, primary_key=True)
+    doctor_id = Column(Integer, ForeignKey('doctors.id'), nullable=False)
+    date = Column(Date, nullable=False)
+    start_time = Column(Time, nullable=False)
+    end_time = Column(Time, nullable=False)
+    status = Column(String(20), default='Available')
+
+    appointments = relationship('Appointment', backref='schedule', lazy=True)
 
 
 # Appointment booking by patient
-class Appointment(db.Model):
+class Appointment(Base):
     __tablename__ = 'appointments'
-    id = db.Column(db.Integer, primary_key=True)
-    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
-    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
-    schedule_id = db.Column(db.Integer, db.ForeignKey('schedules.id'), nullable=False)
-    reason = db.Column(db.String(200), nullable=True)
-    status = db.Column(db.String(20), default='Pending')  # Pending / Confirmed / Cancelled
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey('patients.id'), nullable=False)
+    doctor_id = Column(Integer, ForeignKey('doctors.id'), nullable=False)
+    schedule_id = Column(Integer, ForeignKey('schedules.id'), nullable=False)
+    reason = Column(String(200), nullable=True)
+    status = Column(String(20), default='Pending')  # Pending / Confirmed / Cancelled
+    created_at = Column(DateTime, default=datetime.utcnow)
