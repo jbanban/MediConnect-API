@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from security import get_password_hash, verify_password
 from database import Base, engine, SessionLocal
 from auth import router as auth_router
-import models
+import models, schemas
 import shutil
 
 
@@ -48,12 +49,12 @@ def get_db():
 # -------------------- PATIENT ROUTES --------------------
 
 @app.get("/patient/dashboard")
-def patient_dashboard():
-    return {"message": "Welcome to your Patient Dashboard", "appointments_count": len(models.Appointment)}
+def patient_dashboard(db: Session = Depends(get_db)):
+    return {"message": "Welcome to your Patient Dashboard", "appointments_count": db.query(models.Appointment).count()}
 
-@app.get("/patient/my-appointments")
-def patient_appointments():
-    return {"message": "List of your appointment requests", "appointments": models.Appointment}
+@app.get("/patient/my-appointments", response_model=list[schemas.AppointmentBase])
+def patient_appointments(db: Session = Depends(get_db)):
+    return {"message": "List of your appointment requests", "appointments": db.query(models.Appointment).all()}
 
 @app.get("/patient/book-appointment")
 def book_appointment(doctor_id: int, date: str, time: str):
@@ -120,17 +121,30 @@ def doctor_profile(doctor_id: int):
             return {"profile": d}
     raise HTTPException(status_code=404, detail="Doctor not found")
 
-@app.get("/doctor/create-account")
-def doctor_create_account(name: str, specialization: str, email: str, password: str):
-    new_doctor = {
-        "id": len(models.Doctor) + 1,
-        "name": name,
-        "specialization": specialization,
-        "email": email,
-        "password": password
-    }
-    models.Doctor.append(new_doctor)
-    return {"message": "Doctor account created successfully", "doctor": new_doctor}
+@app.post("/doctor/create-account", response_model=schemas.UserResponse)
+def doctor_create_account(doctor_data: schemas.DoctorCreate, db: Session = Depends(get_db)):
+    existing_user = db.query(models.User).filter(models.User.email == doctor_data.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    hashed_pw = get_password_hash(doctor.password)
+    new_user = models.User(
+        name=doctor.name,
+        email=doctor.email,
+        password=hashed_pw,
+        role=doctor.role
+    )
+    doctor = models.Doctor(
+        user=new_user,
+        specialization=doctor.specialization,
+        contact=doctor.contact
+    )
+
+    db.add(new_user)
+    db.add(doctor)
+    db.commit()
+    db.refresh(new_user)
+    db.refresh(doctor)
+    return new_user
 
 @app.get("/requests/{doctor_id}")
 def get_appointment_requests(doctor_id: int, db: Session = Depends(get_db)):

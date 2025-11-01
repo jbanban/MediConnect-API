@@ -23,7 +23,6 @@ class Patient(Base):
 
     patient_id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
-    age = Column(Integer, nullable=True)
     gender = Column(String(10), nullable=True)
     contact = Column(String(20), nullable=True)
 

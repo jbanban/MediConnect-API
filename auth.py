@@ -50,7 +50,7 @@ def login_user(email: str, password: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token = create_access_token({"sub": user.email, "role": user.role})
-    return {"access_token": token, "role": user.role, "user_id": user.id}
+    return {"access_token": token, "role": user.role, "user_id": user.user_id}
 
 @router.post("/register", response_model= schemas.UserResponse)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -66,10 +66,17 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         password=hashed_pw,
         role=user.role
     )
+    patient = models.Patient(
+        user=new_user,
+        gender=user.gender,
+        contact=user.contact,
+    )
 
     db.add(new_user)
+    db.add(patient)
     db.commit()
     db.refresh(new_user)
+    db.refresh(patient)
     return new_user
 
 
