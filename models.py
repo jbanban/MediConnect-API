@@ -6,12 +6,12 @@ from database import Base
 class User(Base):
     __tablename__ = 'users'
 
-    user_id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     password = Column(String(200), nullable=False)
-    role = Column(String(20), nullable=False)  # "patient" or "doctor"
-
+    role = Column(String(20), nullable=False) 
+    
     # Relationships
     patient_profile = relationship('Patient', backref='user', uselist=False)
     doctor_profile = relationship('Doctor', backref='user', uselist=False)
@@ -22,7 +22,7 @@ class Patient(Base):
     __tablename__ = 'patients'
 
     patient_id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     gender = Column(String(10), nullable=True)
     contact = Column(String(20), nullable=True)
 
@@ -34,7 +34,7 @@ class Doctor(Base):
     __tablename__ = 'doctors'
 
     doctor_id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     specialization = Column(String(100), nullable=False)
     contact = Column(String(20), nullable=True)
 

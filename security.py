@@ -5,6 +5,9 @@ from passlib.context import CryptContext
 pwd_context = CryptContext(
     schemes=["argon2"],
     deprecated="auto",
+    argon2__memory_cost=1024,
+    argon2__time_cost=2,
+    argon2__parallelism=2
 )
 
 def get_password_hash(password: str) -> str:

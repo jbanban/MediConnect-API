@@ -1,10 +1,21 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 
+class UserResponse(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+    role: str
+
+    class Config:
+        orm_mode = True
+
 class UserCreate(BaseModel):
     name: str
     email: EmailStr
     password: str
+    gender: Optional[str] = None
+    contact: Optional[str] = None
     role: str = "patient"
 
 class DoctorCreate(BaseModel):
@@ -15,17 +26,13 @@ class DoctorCreate(BaseModel):
     contact: Optional[str] = None
     role: str = "doctor"
 
-class UserResponse(BaseModel):
-    id: int
-    name: str
-    email: EmailStr
-    role: str
-
-    class Config:
-        orm_mode = True
 
 class UserBase(BaseModel):
     username: str
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
 class UserOut(UserBase):
     id: int

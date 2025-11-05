@@ -44,13 +44,14 @@ def verify_token(token: str):
         return None
 
 @router.post("/login")
-def login_user(email: str, password: str, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.email == email).first()
-    if not user or not verify_password(password, user.password):
+def login_user(request: schemas.LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == request.email).first()
+
+    if not user or not verify_password(request.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token = create_access_token({"sub": user.email, "role": user.role})
-    return {"access_token": token, "role": user.role, "user_id": user.user_id}
+    return {"access_token": token, "role": user.role, "user_id": user.id}
 
 @router.post("/register", response_model= schemas.UserResponse)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
