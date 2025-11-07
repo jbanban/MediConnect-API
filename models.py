@@ -65,5 +65,19 @@ class Appointment(Base):
     doctor_id = Column(Integer, ForeignKey('doctors.doctor_id'), nullable=False)
     schedule_id = Column(Integer, ForeignKey('schedules.schedule_id'), nullable=False)
     reason = Column(String(200), nullable=True)
-    status = Column(String(20), default='Pending')  # Pending / Confirmed / Cancelled
+    status = Column(String(20), default='Pending')
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class RequestAppointment(Base):
+    __tablename__ = 'request_appointments'
+
+    request_id = Column(Integer, primary_key=True)
+    doctor_id = Column(Integer, ForeignKey('doctors.doctor_id'), nullable=False)
+    patient_id = Column(Integer, ForeignKey('patients.patient_id'), nullable=False)
+    patient_contact = Column(String(20), nullable=False)
+    preferred_date = Column(Date, nullable=False)
+    preferred_time = Column(Time, nullable=False)
+    reason = Column(String(200), nullable=True)
+    status = Column(String(20), default='Pending')
+    requested_at = Column(DateTime, default=datetime.utcnow)
